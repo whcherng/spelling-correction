@@ -40,5 +40,5 @@ jobs:
           project: "whcherng-spelling-co-13"
           entrypoint: "jsr:@deno/nextjs-start"
           root: "."
-          include: .next, public
+          
           
