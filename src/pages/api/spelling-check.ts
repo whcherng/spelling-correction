@@ -1,9 +1,5 @@
 import type {NextApiRequest, NextApiResponse} from 'next'
 
-type RequestData = {
-    text: string;
-}
-
 type ResponseData = {
     message: string;
     data?: unknown;
