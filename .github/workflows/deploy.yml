@@ -39,6 +39,6 @@ jobs:
         with:
           project: "whcherng-spelling-co-13"
           entrypoint: "jsr:@deno/nextjs-start/v15"
-          root: "."
+          root: ".next"
           
           
