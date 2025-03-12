@@ -1,7 +1,7 @@
 "use client";
 
 import {NextPage} from "next";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 interface ISpellingCorrectionSuggestions {
     "replacement_substring": string,
@@ -15,7 +15,6 @@ interface ISpellingCorrectionContentResponse {
     "original_substring_char_end": number,
     "original_substring_char_start": number,
     suggestions: ISpellingCorrectionSuggestions[]
-
 }
 
 interface ISpellingCheckResponse {
@@ -26,71 +25,51 @@ interface ISpellingCheckResponse {
 }
 
 const EXAMPLES = [
-    "thies is a bery long text, do u bliebe me?",
-    "thies is a beryyyy long text, do u bliebe me",
-    "thies is a bery longggg text, do u bliebe me?"
+    "All amimo acids at the anchor positions other than the permissible ones were assigned low scores to exclude petides with non-permisible amimo acids from the list of predicted binders. The final binding scores were normalised to a scale of 1–9 and the final models were tested and validated rigorous.",
+    "Eighteen participants revealed that they shared information from the Extranet with others outside of the comitee. The information they shared most often included provincial directives and local informasion such as Hamilton medical advisors and Steering Committee minutes",
+    "It was assumed that two test sequence could be distinguished if one of them contained a sub-sequence and the other did not, even if the second contaned a sub-sequence that differed from one in the first at only on position, as hybridisation methods to distinguish such sequences are well established for the assay of single nucletide polymorphis"
 ]
 
 
 const SpellingCorrectionPage: NextPage = () => {
-    const [text, setText] = useState('thies is a bery long text, do u bliebe me ?');
+    const [text, setText] = useState('');
+    const [result, setResult] = useState<ISpellingCheckResponse>(
+        {
+            fixed: "",
+            text: "",
+            contentToReplace: [],
+        }
+    );
 
-    const result: ISpellingCheckResponse = text ? {
-        fixed: "This is a very long text. Do you believe me?",
-        text: "thies is a bery long text, do u bliebe me ?",
-        contentToReplace: [
-            {
-                "original_substring": "thies",
-                "original_substring_char_end": 4,
-                "original_substring_char_start": 0,
-                suggestions: [
-                    {
-                        "replacement_substring": "This",
-                        "replacement_substring_char_end": 3,
-                        "replacement_substring_char_start": 0,
-                        "probability": 0.01
-                    }
-                ],
-            },
-            {
-                "original_substring": "bery",
-                "original_substring_char_end": 14,
-                "original_substring_char_start": 11,
-                suggestions: [
-                    {
-                        "replacement_substring": "very",
-                        "replacement_substring_char_end": 13,
-                        "replacement_substring_char_start": 10,
-                        "probability": 0.02
-                    }
-                ],
-            },
-            {
-                "original_substring": "bliebe",
-                "original_substring_char_end": 37,
-                "original_substring_char_start": 32,
-                suggestions: [
-                    {
-                        "replacement_substring": "believe",
-                        "replacement_substring_char_end": 39,
-                        "replacement_substring_char_start": 33,
-                        "probability": 0.06
-                    }
-                ],
+    useEffect(() => {
+        // Set a timeout to update debounced value after 500ms
+        const handler = setTimeout(async () => {
+            const result = await fetch('api/spelling-check',
+                {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(text)
+                }
+            );
 
-            }
-        ]
-    } : {
-        fixed: "",
-        text: "",
-        contentToReplace: [],
-    }
+            const responseData = await result.json() as { data: ISpellingCheckResponse };
 
+            setResult(responseData.data);
+        }, 500);
+
+        // Cleanup the timeout if `query` changes before 500ms
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [text])
 
     return <div className="flex gap-6 h-svh p-[12px]">
         <div className="w-full h-5/6">
             <h1>Spelling Correction system</h1>
             <textarea
+                value={text}
                 contentEditable={true}
                 spellCheck={false}
                 onChange={({target: {value}}) => setText(value)}
@@ -98,11 +77,13 @@ const SpellingCorrectionPage: NextPage = () => {
             />
             <h2 className="mt-2">Examples:</h2>
             <div
-                className="flex gap-1 mt-1.5"
+                className="flex gap-2 mt-1.5"
             >
                 {EXAMPLES.map((example) => <p
                     key={example} className="cursor-pointer p-2 w-fit rounded bg-white dark:bg-gray-800"
-                    onClick={() => setText(example)}>
+                    onClick={() => {
+                        setText(example)
+                    }}>
                     {example}
                 </p>)}
             </div>
@@ -124,7 +105,7 @@ const SpellingCorrectionPage: NextPage = () => {
                         >
                             <s>{original_substring}</s>
                             <span>{best_candidate.replacement_substring}</span>
-                            <span className="float-end">{best_candidate.probability * 100}%</span>
+                            <span className="float-end">{(best_candidate.probability * 100).toFixed(8)}%</span>
 
                             <hr className="mt-2 mb-2"/>
                             <p>Candidates:</p>
@@ -133,7 +114,7 @@ const SpellingCorrectionPage: NextPage = () => {
                                     key={replacement_substring}
                                     className="bg-white dark:bg-gray-500 p-1 mt-1 mb-1 rounded flex justify-between w-full">
                                     <b>{replacement_substring}</b>
-                                    <p>{probability * 100}%</p>
+                                    <p>{(probability * 100).toFixed(8)}%</p>
                                 </div>)}
                         </div>
                     })

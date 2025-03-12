@@ -16,7 +16,9 @@ export default async function handler(
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(req.body)
+                body: JSON.stringify({
+                    text: req.body
+                })
             },
         );
         res.status(200).json({message: "OK", data: await result.json()})
