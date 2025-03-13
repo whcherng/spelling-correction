@@ -100,7 +100,7 @@ const SpellingCorrectionPage: NextPage = () => {
                         <>Looks good to me 😁</>
                     }
                 </div>
-                {result?.contentToReplace.length > 0 ? <>
+                {result?.contentToReplace?.length > 0 ? <>
                     <h1>Errors</h1>
                     <div className="mt-4 flex flex-col gap-2">
                         {result?.contentToReplace?.map(({original_substring, suggestions}) => {
