@@ -90,36 +90,43 @@ const SpellingCorrectionPage: NextPage = () => {
         </div>
         <div className="w-[500px]">
             <h1>Suggestions</h1>
-            {result ? <div className="mt-4">
+            {result && text ? <div className="mt-4">
                 <div className="mb-4 p-4 border border-gray-300 rounded-lg ">
-                    <s>{result.text}</s>
-                    <p>{result.fixed}</p>
-                </div>
-                <h1>Errors</h1>
-                <div className="mt-4 flex flex-col gap-2">
-                    {result?.contentToReplace?.map(({original_substring, suggestions}) => {
-                        const [best_candidate] = suggestions;
-
-                        return <div key={original_substring}
-                                    className="w-full cursor-pointer p-2 rounded bg-white dark:bg-gray-800"
-                        >
-                            <s>{original_substring}</s>
-                            <span>{best_candidate.replacement_substring}</span>
-                            <span className="float-end">{(best_candidate.probability * 100).toFixed(8)}%</span>
-
-                            <hr className="mt-2 mb-2"/>
-                            <p>Candidates:</p>
-                            {suggestions.map(({replacement_substring, probability}) =>
-                                <div
-                                    key={replacement_substring}
-                                    className="bg-white dark:bg-gray-500 p-1 mt-1 mb-1 rounded flex justify-between w-full">
-                                    <b>{replacement_substring}</b>
-                                    <p>{(probability * 100).toFixed(8)}%</p>
-                                </div>)}
-                        </div>
-                    })
+                    {result.text !== result.fixed ?
+                        <>
+                            <s>{result.text}</s>
+                            <p>{result.fixed}</p>
+                        </> :
+                        <>Looks good to me 😁</>
                     }
                 </div>
+                {result?.contentToReplace.length > 0 ? <>
+                    <h1>Errors</h1>
+                    <div className="mt-4 flex flex-col gap-2">
+                        {result?.contentToReplace?.map(({original_substring, suggestions}) => {
+                            const [best_candidate] = suggestions;
+
+                            return <div key={original_substring}
+                                        className="w-full cursor-pointer p-2 rounded bg-white dark:bg-gray-800"
+                            >
+                                <s>{original_substring}</s>
+                                <span>{best_candidate.replacement_substring}</span>
+                                <span className="float-end">{(best_candidate.probability * 100).toFixed(8)}%</span>
+
+                                <hr className="mt-2 mb-2"/>
+                                <p>Candidates:</p>
+                                {suggestions.map(({replacement_substring, probability}) =>
+                                    <div
+                                        key={replacement_substring}
+                                        className="bg-white dark:bg-gray-500 p-1 mt-1 mb-1 rounded flex justify-between w-full">
+                                        <b>{replacement_substring}</b>
+                                        <p>{(probability * 100).toFixed(8)}%</p>
+                                    </div>)}
+                            </div>
+                        })
+                        }
+                    </div>
+                </> : <>No error found 🤔</>}
             </div> : <div className="mt-4">No Suggestion yet.</div>}
         </div>
     </div>
