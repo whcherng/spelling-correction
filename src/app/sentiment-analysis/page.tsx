@@ -12,6 +12,7 @@ interface ISentimentContentResponse {
 
 const SentimentAnalysisPage: NextPage = () => {
     const [text, setText] = useState('');
+    const [model, setModel] = useState(1);
     const [result, setResult] = useState<ISentimentContentResponse>();
     const [seed, setSeed] = useState(Math.floor(Math.random() * 7));
 
@@ -24,7 +25,7 @@ const SentimentAnalysisPage: NextPage = () => {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(text)
+                    body: JSON.stringify({text, model})
                 }
             );
 
@@ -38,11 +39,19 @@ const SentimentAnalysisPage: NextPage = () => {
         return () => {
             clearTimeout(handler);
         };
-    }, [text])
+    }, [text, model])
 
     return <div className="flex gap-6 h-svh p-[12px]">
         <div className="w-full">
-            <h1>Movie Review Sentiment Analysis</h1>
+            <div className="flex gap-6">
+                <h1>Movie Review Sentiment Analysis</h1>
+                <select className="bg-black border border-gray-300 rounded-lg" value={model}
+                        onChange={({target: {value}}) => setModel(Number(value))}>
+                    <option value={1}>Linear SVM</option>
+                    <option value={2}>Random Forest</option>
+                    <option value={3}>Logistic Regression</option>
+                </select>
+            </div>
             <textarea
                 value={text}
                 contentEditable={true}

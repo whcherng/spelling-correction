@@ -17,7 +17,8 @@ export default async function handler(
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    text: req.body
+                    text: req.body.text,
+                    model: req.body.model
                 })
             },
         );
