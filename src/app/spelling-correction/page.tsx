@@ -101,7 +101,7 @@ const SpellingCorrectionPage: NextPage = () => {
     }
 
     const applyCorrections = () => {
-        let processedText = text.split('');
+        const processedText = text.split('');
         let deleteCounter = 0;
 
         selection?.forEach(({
@@ -118,7 +118,7 @@ const SpellingCorrectionPage: NextPage = () => {
     };
 
     const renderCorrectedText = () => {
-        let processedText = text.split('');
+        const processedText = text.split('');
         let deleteCounter = 0;
 
         selection?.forEach(({
@@ -291,6 +291,7 @@ const SpellingCorrectionPage: NextPage = () => {
                                             <p>{(suggestion.probability * 100).toFixed(8)}%</p>
                                         </div>),
                                         <div
+                                            key="original-text"
                                             onClick={() => changeSelection(original_substring, original_substring_char_start, original_substring_char_end, original_substring_index, -1)}
                                             className="cursor-pointer bg-white dark:bg-gray-500 hover:bg-gray-400 p-1 mt-1 mb-1 rounded flex justify-between w-full"
                                         >
