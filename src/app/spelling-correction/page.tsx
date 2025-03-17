@@ -43,6 +43,7 @@ const EXAMPLES = [
 
 const SpellingCorrectionPage: NextPage = () => {
     const [text, setText] = useState('');
+    const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<ISpellingCheckResponse>(
         {
             fixed: "",
@@ -141,19 +142,25 @@ const SpellingCorrectionPage: NextPage = () => {
     useEffect(() => {
         // Set a timeout to update debounced value after 500ms
         const handler = setTimeout(async () => {
-            const result = await fetch('api/spelling-check',
-                {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(text)
-                }
-            );
+            setLoading(true);
 
-            const responseData = await result.json() as { data: ISpellingCheckResponse };
+            try {
+                const result = await fetch('api/spelling-check',
+                    {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(text)
+                    }
+                );
 
-            setResult(responseData.data);
+                const responseData = await result.json() as { data: ISpellingCheckResponse };
+
+                setResult(responseData.data);
+            } finally {
+                setLoading(false)
+            }
         }, 500);
 
         // Cleanup the timeout if `query` changes before 500ms
@@ -229,8 +236,11 @@ const SpellingCorrectionPage: NextPage = () => {
             <div
                 className="sticky top-5">
                 <h2>Output:</h2>
-                <div className="mb-4 p-4 border border-gray-300 rounded-lg sticky top-5"
-                     dangerouslySetInnerHTML={{__html: outputText}}/>
+                {
+                    loading ? <div>Loading...</div> :
+                        <div className="mb-4 p-4 border border-gray-300 rounded-lg sticky top-5"
+                             dangerouslySetInnerHTML={{__html: outputText}}/>
+                }
                 <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                         onClick={applyCorrections}>
                     replace text with output
@@ -254,53 +264,55 @@ const SpellingCorrectionPage: NextPage = () => {
                 {result?.contentToReplace?.length > 0 ? <>
                     <h1>Errors</h1>
                     <div className="mt-4 flex flex-col gap-2">
-                        {result?.contentToReplace?.map(({
-                                                            original_substring,
-                                                            original_substring_char_start,
-                                                            original_substring_char_end,
-                                                            suggestions
-                                                        }, original_substring_index) => {
-                            const [best_candidate] = suggestions;
+                        {loading ?
+                            <div>Loading...</div> :
+                            result?.contentToReplace?.map(({
+                                                               original_substring,
+                                                               original_substring_char_start,
+                                                               original_substring_char_end,
+                                                               suggestions
+                                                           }, original_substring_index) => {
+                                const [best_candidate] = suggestions;
 
-                            return <AccordionItem
-                                key={original_substring + original_substring_index}
-                                title=
-                                    {<div className="flex justify-between w-full">
-                                        <span>{original_substring}</span>
-                                        <span
-                                            className="float-end">{(best_candidate.probability * 100).toFixed(8)}%</span>
-                                    </div>}
-                                isOpen={selection[original_substring_index]?.isOpen}
-                                setIsOpen={() => {
-                                    setSelection((prevState) => prevState.map((data, index) => {
-                                        if (index !== original_substring_index) {
-                                            return data;
-                                        }
+                                return <AccordionItem
+                                    key={original_substring + original_substring_index}
+                                    title=
+                                        {<div className="flex justify-between w-full">
+                                            <span>{original_substring}</span>
+                                            <span
+                                                className="float-end">{(best_candidate.probability * 100).toFixed(8)}%</span>
+                                        </div>}
+                                    isOpen={selection[original_substring_index]?.isOpen}
+                                    setIsOpen={() => {
+                                        setSelection((prevState) => prevState.map((data, index) => {
+                                            if (index !== original_substring_index) {
+                                                return data;
+                                            }
 
-                                        const {isOpen} = data;
-                                        return {...data, isOpen: !isOpen}
-                                    }))
-                                }}
-                                candidates={
-                                    [...suggestions.map((suggestion, index) =>
-                                        <div
-                                            key={suggestion.replacement_substring}
-                                            onClick={() => changeSelection(original_substring, original_substring_char_start, original_substring_char_end, original_substring_index, index)}
-                                            className="cursor-pointer bg-white dark:bg-gray-500 hover:bg-gray-400 p-1 mt-1 mb-1 rounded flex justify-between w-full">
-                                            <b>{suggestion.replacement_substring}</b>
-                                            <p>{(suggestion.probability * 100).toFixed(8)}%</p>
-                                        </div>),
-                                        <div
-                                            key="original-text"
-                                            onClick={() => changeSelection(original_substring, original_substring_char_start, original_substring_char_end, original_substring_index, -1)}
-                                            className="cursor-pointer bg-white dark:bg-gray-500 hover:bg-gray-400 p-1 mt-1 mb-1 rounded flex justify-between w-full"
-                                        >
-                                            <b>{original_substring}</b>
-                                            <p>-</p>
-                                        </div>
-                                    ]}
-                            />
-                        })
+                                            const {isOpen} = data;
+                                            return {...data, isOpen: !isOpen}
+                                        }))
+                                    }}
+                                    candidates={
+                                        [...suggestions.map((suggestion, index) =>
+                                            <div
+                                                key={suggestion.replacement_substring}
+                                                onClick={() => changeSelection(original_substring, original_substring_char_start, original_substring_char_end, original_substring_index, index)}
+                                                className="cursor-pointer bg-white dark:bg-gray-500 hover:bg-gray-400 p-1 mt-1 mb-1 rounded flex justify-between w-full">
+                                                <b>{suggestion.replacement_substring}</b>
+                                                <p>{(suggestion.probability * 100).toFixed(8)}%</p>
+                                            </div>),
+                                            <div
+                                                key="original-text"
+                                                onClick={() => changeSelection(original_substring, original_substring_char_start, original_substring_char_end, original_substring_index, -1)}
+                                                className="cursor-pointer bg-white dark:bg-gray-500 hover:bg-gray-400 p-1 mt-1 mb-1 rounded flex justify-between w-full"
+                                            >
+                                                <b>{original_substring}</b>
+                                                <p>-</p>
+                                            </div>
+                                        ]}
+                                />
+                            })
                         }
                     </div>
                 </> : <>No error found 🤔</>}
