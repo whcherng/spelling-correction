@@ -66,7 +66,8 @@ const SentimentAnalysisPage: NextPage = () => {
                 {
                     result?.prediction ?
                         <div className="text-center">
-                            <p className="text-9xl">
+                            <p> {result?.prediction?.sentiment === 1 ? "The review is good" : "The review is bad"}</p>
+                            <p className="text-9xl mt-2 mb-2">
                                 {result?.prediction?.sentiment === 1 ? ['😏', '😊', '🤩', '😄', '😄', '😃', '🤗'][seed] : ['😅', '🤨', '😤', '😒', '😔', '😟', '😡'][seed]}
                             </p>
                             {result?.prediction?.score &&
