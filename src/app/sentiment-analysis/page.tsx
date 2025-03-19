@@ -12,7 +12,7 @@ interface ISentimentContentResponse {
 
 const SentimentAnalysisPage: NextPage = () => {
     const [text, setText] = useState('');
-    const [model, setModel] = useState(1);
+    const [model, setModel] = useState(3);
     const [result, setResult] = useState<ISentimentContentResponse>();
     const [seed, setSeed] = useState(Math.floor(Math.random() * 7));
 
