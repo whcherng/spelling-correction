@@ -47,9 +47,9 @@ const SentimentAnalysisPage: NextPage = () => {
                 <h1>Movie Review Sentiment Analysis</h1>
                 <select className="bg-black border border-gray-300 rounded-lg" value={model}
                         onChange={({target: {value}}) => setModel(Number(value))}>
+                    <option value={3}>Logistic Regression (Best Model)</option>
                     <option value={1}>Linear SVM</option>
                     <option value={2}>Random Forest</option>
-                    <option value={3}>Logistic Regression</option>
                 </select>
             </div>
             <textarea
