@@ -70,8 +70,6 @@ const SentimentAnalysisPage: NextPage = () => {
                             <p className="text-9xl mt-2 mb-2">
                                 {result?.prediction?.sentiment === 1 ? ['😏', '😊', '🤩', '😄', '😄', '😃', '🤗'][seed] : ['😅', '🤨', '😤', '😒', '😔', '😟', '😡'][seed]}
                             </p>
-                            {result?.prediction?.score &&
-                                <p>Decision Function Score: {result?.prediction?.score}</p>}
                         </div>
                         : 'No analysis yet'
                 }
